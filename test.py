@@ -28,7 +28,7 @@ while True:
             
     get_quit()
     game_surface.fill((255, 255, 255))
-    pygame.draw.rect(game_surface, (0, 255, 0), (design_width//2 - 25, design_height//2 - 25, 50, 50))
+    pygame.draw.rect(game_surface, (0, 255, 0), (design_width//2, design_height//2, 25, 50))
     scaled_surface = pygame.transform.scale(game_surface, (monitor_width, monitor_height))
     screen.blit(scaled_surface, (0, 0))
     pygame.display.update()
