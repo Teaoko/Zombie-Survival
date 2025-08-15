@@ -1,0 +1,36 @@
+here's whats left to do for my game
+
+-shop
+--fix the 'X'
+--add currency logic
+--finish the colors for the turrets
+--save turret color to the game
+--add a unlocking system
+--add a page system
+
+-menu
+--make it look nicer
+--give first time players instructions
+--teach the tutorial for how to play 
+--make a skip tutorial button when playing the game
+--add sounds or background music to the menu
+
+-powerup
+--make more powerups
+--have a bigger dictonary for everything
+--make the powerups work
+
+-boss
+--design big zombies
+--add boss music
+--spawn little zombies from the big one
+--make a ground shake
+
+-zombies
+--rely on a giant dictonary 
+--add guns to zombies
+--design a lot more
+--turn the zombies so they face the player
+
+-multiplayer
+--add something idk 
