@@ -57,13 +57,12 @@ class Zombie(pygame.sprite.Sprite):
 		self.min_y = 0 + self.r
 		self.dy = self.zombie_type
 
-		for value in self.settings.zombie_isboss.values():
-			if value is True:
+		for value in self.settings.zombie_isboss.items():
+			if value:
 				zombie_img = pygame.Surface((30, 30), pygame.SRCALPHA)
-				self.image = zombie_img
 			else:
 				zombie_img = pygame.Surface((50, 50), pygame.SRCALPHA)
-				self.image = zombie_img
+			self.image = zombie_img
 
 		self.alpha = 255
 		self.fade_speed = 2

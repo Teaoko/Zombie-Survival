@@ -22,7 +22,8 @@ class Game:
 		self.db = db 
 
 		#Screen settings
-		info = pygame.display.Info()
+		#Testing
+		"""info = pygame.display.Info()
 		self.monitor_width, self.monitor_height = info.current_w, info.current_h
 		self.screen = pygame.display.set_mode((self.monitor_width, self.monitor_height), pygame.FULLSCREEN)
 		pygame.display.set_caption("Zombie Survival")
@@ -31,7 +32,10 @@ class Game:
 		self.game_surface = pygame.Surface((self.DESIGN_WIDTH, self.DESIGN_HEIGHT))
 
 		self.scaled_surface = pygame.transform.scale(self.game_surface, (self.monitor_width, self.monitor_height))
-		#self.screen.blit(self.scaled_surface, (0, 0))
+		#self.screen.blit(self.scaled_surface, (0, 0))"""
+
+		self.screen = pygame.display.set_mode((self.settings.width, self.settings.height))
+		pygame.display.set_caption("Zombie Survival")
 
 		self.turret = Turret(self)
 		self.zombie = Zombie(1, self)
@@ -108,6 +112,7 @@ class Game:
 				
 			self.life_added = False
 
+	#Testing
 	"""def handleBullets(self, event):
 		if pygame.joystick.get_count() == 0:
 			print("No joystick connected!")
@@ -175,6 +180,7 @@ class Game:
 
 	def zombieSpawn(self):
 		#after these: 200, 220, 245, 260
+		#Comments below r for testing
 		if self.zombie_time_count >= 200:
 			self.wave = 7
 			self.zombieList.add(Zombie(6, self))
@@ -191,13 +197,13 @@ class Game:
 			self.wave = 3
 			self.zombieList.add(Zombie(3, self))
 		elif self.zombie_time_count >= 12:
-			pygame.draw.rect(self.game_surface, (255, 255, 255), (self.DESIGN_WIDTH//2 - 25, self.DESIGN_HEIGHT//2 - 25, 50, 50))
+			#pygame.draw.rect(self.game_surface, (255, 255, 255), (self.DESIGN_WIDTH//2 - 25, self.DESIGN_HEIGHT//2 - 25, 50, 50))
 			self.wave = 2
 			self.zombieList.add(Zombie(2, self))
 		elif self.zombie_time_count >= 0:
 			self.zombieList.add(Zombie(1, self))
-		self.scaled_surface = pygame.transform.scale(self.game_surface, (self.monitor_width, self.monitor_height))
-		self.screen.blit(self.scaled_surface, (0, 0))
+		#self.scaled_surface = pygame.transform.scale(self.game_surface, (self.monitor_width, self.monitor_height))
+		#self.screen.blit(self.scaled_surface, (0, 0))
 
 	def update_zombies(self):
 		for zombie in self.zombieList.sprites():
