@@ -1,11 +1,9 @@
 import pygame
-from pygame.locals import *
 from Project.Settings import Settings
-from Project.Zombie import Zombie
 import time
 from Project.resources import load_sound
 
-pygame.init()
+# pygame.init() is handled in main
 
 class Turret(pygame.sprite.Sprite):
 	def __init__(self, game):
@@ -13,9 +11,8 @@ class Turret(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 
 		self.game = game
-    # Use shared settings instance if provided via game; fallback to new
-    self.settings = getattr(game, 'settings', None) or Settings()
-		self.zombie = Zombie(1, self)
+        # Use shared settings instance if provided via game; fallback to new
+        self.settings = getattr(game, 'settings', None) or Settings()
 
 		self.x, self.y = self.settings.turret_x, self.settings.turret_y
 		self.r = self.settings.r
@@ -37,8 +34,8 @@ class Turret(pygame.sprite.Sprite):
 		self.angle = 0
         self.turret_img = pygame.Surface((30, 30), pygame.SRCALPHA).convert_alpha()
         self.image = self.turret_img.copy()
-        self.turret = pygame.draw.circle(self.turret_img, ("white"), (15, 15), 10)
-        self.turret = pygame.draw.rect(self.turret_img, ("white"), (8, -55, 14, 70))
+        pygame.draw.circle(self.turret_img, ("white"), (15, 15), 10)
+        pygame.draw.rect(self.turret_img, ("white"), (8, -55, 14, 70))
 		self.rect = self.image.get_rect(center = (self.x, self.y))
 		self.is_ethereal = False
 		self.alpha = 255
@@ -46,7 +43,7 @@ class Turret(pygame.sprite.Sprite):
 		self.last_damage_time = 0
 		self.damage_duration = 2
 
-    self.sound = load_sound("Turret hit.wav", 0.5)
+        self.sound = load_sound("Turret hit.wav", 0.5)
 
 	def handle_rotate(self):
 		keys = pygame.key.get_pressed()
@@ -82,8 +79,8 @@ class Turret(pygame.sprite.Sprite):
 				self.game.lives -= 1
 				self.game.zombieList.remove(zombie)
 				self.last_damage_time = time.time()
-                # Play cached sound instead of reloading from disk
-                self.sound.play()
+				# Play cached sound instead of reloading from disk
+				self.sound.play()
 
 		if self.is_ethereal:
 			self.flicker()

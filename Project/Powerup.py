@@ -1,5 +1,4 @@
-import pygame, sys, random, math, time
-from pygame.locals import QUIT
+import pygame, random, time
 from Project.Settings import Settings
 
 class Powerup(pygame.sprite.Sprite):
@@ -34,13 +33,11 @@ class Powerup(pygame.sprite.Sprite):
 			self.kill()
 
 	def collect_powerup(self, gui):
-		self.PPN = [booster['name'] for booster in self.boosters]  # Pick power name
-		self.PT = [time['time'] for time in self.boosters]  # Power time
-		self.ATP = [active['active'] for active in self.boosters]  # Active power times
-		self.PUN = random.choice(self.PPN)  # Power up name
-		if self.PUN not in self.PUL and isinstance(self.game.bars, int):
-			self.game.bars += 1
-			self.PUL.append(self.PUN)
-			self.gui.show_bars()
-		else:  # no power-ups in the list
-			pass
+        # Choose a random booster and add a bar widget to GUI group
+        power_names = [booster['name'] for booster in self.boosters]
+        chosen_power = random.choice(power_names)
+        if chosen_power not in self.PUL:
+            self.PUL.append(chosen_power)
+            # This sprite is already part of game.bars via groups setup
+            if hasattr(self.gui, 'show_bars'):
+                self.gui.show_bars()

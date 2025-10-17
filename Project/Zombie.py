@@ -1,10 +1,9 @@
 import pygame, random, pygame.sprite
-from pygame.math import Vector2
 from Project.Settings import Settings
 from Project.Powerup import Powerup
 from Project.resources import load_sound
 
-pygame.init()
+# pygame.init() is handled in main
 
 class Zombie(pygame.sprite.Sprite):
 	def __init__(self, zombie_type, game):
@@ -60,22 +59,20 @@ class Zombie(pygame.sprite.Sprite):
 		self.dy = self.zombie_type
 
         # Prepare surface once and reuse; convert_alpha for faster blits
-        for value in self.settings.zombie_isboss.items():
-            if value:
-                zombie_img = pygame.Surface((30, 30), pygame.SRCALPHA)
-            else:
-                zombie_img = pygame.Surface((50, 50), pygame.SRCALPHA)
-            self.image = zombie_img.convert_alpha()
+        is_boss = self.settings.zombie_isboss.get(f"zombie{self.zombie_type}", False)
+        base_size = (30, 30) if is_boss else (50, 50)
+        zombie_img = pygame.Surface(base_size, pygame.SRCALPHA).convert_alpha()
+        self.image = zombie_img
 
 		self.alpha = 255
 		self.fade_speed = 2
 
     self.sound = load_sound("Zombie hit.wav", 0.5)
 
-		if self.zombie_info:
-			self.zombie = pygame.draw.circle(zombie_img, self.zombie_info['color1'], (15, 15), self.zombie_info['size1'])
-			self.zombie = pygame.draw.circle(zombie_img, self.zombie_info['color2'], (15, 15), self.zombie_info['size2'])
-			self.ACC = self.zombie_info['ACC']
+        if self.zombie_info:
+            pygame.draw.circle(zombie_img, self.zombie_info['color1'], (15, 15), self.zombie_info['size1'])
+            pygame.draw.circle(zombie_img, self.zombie_info['color2'], (15, 15), self.zombie_info['size2'])
+            self.ACC = self.zombie_info['ACC']
 
 		self.rect = self.image.get_rect(center=(self.x, self.y))
 
