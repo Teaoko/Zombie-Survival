@@ -2,6 +2,7 @@ import pygame, random, pygame.sprite
 from pygame.math import Vector2
 from Project.Settings import Settings
 from Project.Powerup import Powerup
+from Project.resources import load_sound
 
 pygame.init()
 
@@ -12,7 +13,8 @@ class Zombie(pygame.sprite.Sprite):
 
 		self.game = game
 		self.powerup = None
-		self.settings = Settings()
+    # Share settings from the parent game to avoid repeated instantiation
+    self.settings = getattr(game, 'settings', None) or Settings()
 		self.r = self.settings.r
 		self.max_x, self.max_y, self.min_x, self.min_y = self.settings.max_x, self.settings.max_y, self.settings.min_x, self.settings.min_y
 		self.alpha = self.settings.alpha
@@ -57,18 +59,18 @@ class Zombie(pygame.sprite.Sprite):
 		self.min_y = 0 + self.r
 		self.dy = self.zombie_type
 
-		for value in self.settings.zombie_isboss.items():
-			if value:
-				zombie_img = pygame.Surface((30, 30), pygame.SRCALPHA)
-			else:
-				zombie_img = pygame.Surface((50, 50), pygame.SRCALPHA)
-			self.image = zombie_img
+        # Prepare surface once and reuse; convert_alpha for faster blits
+        for value in self.settings.zombie_isboss.items():
+            if value:
+                zombie_img = pygame.Surface((30, 30), pygame.SRCALPHA)
+            else:
+                zombie_img = pygame.Surface((50, 50), pygame.SRCALPHA)
+            self.image = zombie_img.convert_alpha()
 
 		self.alpha = 255
 		self.fade_speed = 2
 
-		self.sound = pygame.mixer.Sound("Sounds/Zombie hit.wav")
-		self.sound.set_volume(0.5) 
+    self.sound = load_sound("Zombie hit.wav", 0.5)
 
 		if self.zombie_info:
 			self.zombie = pygame.draw.circle(zombie_img, self.zombie_info['color1'], (15, 15), self.zombie_info['size1'])
@@ -120,7 +122,7 @@ class Zombie(pygame.sprite.Sprite):
 			self.is_dead = True
 			self.fade_out()
 		else:
-			self.image.set_alpha(self.alpha)
+            self.image.set_alpha(self.alpha)
 
 	def fade_out(self):
 		self.alpha -= self.fade_speed

@@ -8,7 +8,8 @@ class Powerup(pygame.sprite.Sprite):
 		self.groups = (game.bars)
 		pygame.sprite.Sprite.__init__(self, self.groups)
 		self.game = game
-		self.settings = Settings()
+        # Share settings from the game instance if available
+        self.settings = getattr(game, 'settings', None) or Settings()
 		self.boosters = self.settings.boosters
 		self.gui = gui
 		self.time_start = time.time()
@@ -16,7 +17,7 @@ class Powerup(pygame.sprite.Sprite):
 		self.bar_length = self.settings.bar_length
 		self.x, self.y = self.settings.powerup_x, self.settings.powerup_y
 		self.length = self.settings.bar_length
-		self.powerup_img = pygame.Surface((130, 30), pygame.SRCALPHA)
+        self.powerup_img = pygame.Surface((130, 30), pygame.SRCALPHA).convert_alpha()
 		self.bar_fill = pygame.draw.rect(self.powerup_img, ("blue"), (5, 5, self.length, 10))
 		self.BFR = pygame.draw.rect(self.powerup_img, ("gray1"), (0, 0, 120, 20), border_radius = 5) #Bar fill radius
 		self.rect = self.powerup_img.get_rect(center=(self.x, self.y))

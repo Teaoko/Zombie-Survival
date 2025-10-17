@@ -9,14 +9,18 @@ from Project.db import DB
 from Project.Powerup import Powerup
 from Project.Settings import Settings
 
-pygame.init()
-pygame.joystick.init()
+    # init is handled centrally in main; keep local usage minimal
+    if not pygame.get_init():
+        pygame.init()
+    if not pygame.joystick.get_init():
+        pygame.joystick.init()
 
 class Game:
 	def __init__(self, db):
 		from Project.Turret import Turret 
 		self.game_state = "menu"
-		self.settings = Settings()
+        # Hold a single Settings instance shared across objects
+        self.settings = Settings()
 		self.length = self.settings.bar_length
 		self.bars = pygame.sprite.Group()
 		self.db = db 
@@ -43,13 +47,13 @@ class Game:
 		#self.powerup = Powerup(self, self.gui)
 
 		self.delta_x, self.delta_y = self.settings.delta_x, self.settings.delta_y
-		self.clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
 		self.zombie_time_count, self.ethereal_time_count = self.settings.zombie_time_count, self.settings.ethereal_time_count
 		#Screen settings
 
 		self.zombieList, self.bulletList, self.turretList = pygame.sprite.Group(), pygame.sprite.Group(), pygame.sprite.Group()
 
-		self.spawn, self.zombieKill = False, False
+        self.spawn, self.zombieKill = False, False
 		self.can_damage = False
 		self.spawnTime = self.settings.spawnTime
 		self.game_state = self.settings.game_state
@@ -141,7 +145,7 @@ class Game:
 				self.turret.amo = self.turret.max_amo
 				#sound_TR.play()"""
 	
-	def handleBullets(self, event):
+    def handleBullets(self, event):
 		# Check for joystick events
 		if event.type == pygame.JOYBUTTONDOWN:
 			# Button 0 (usually "A" on Xbox controllers) to shoot
@@ -154,9 +158,9 @@ class Game:
 			elif event.button == 1:
 				if self.turret.amo < self.turret.max_amo:
 					self.turret.amo = self.turret.max_amo
-					# sound_TR.play()
+                # sound_TR.play()
 				else:
-					# sound_CR.play()
+                # sound_CR.play()
 					pass
 
 		# Keyboard support (already present)

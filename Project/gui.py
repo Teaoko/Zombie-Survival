@@ -6,17 +6,19 @@ from Project.Zombie import Zombie
 from Project.db import DB
 from Project.Powerup import Powerup
 from Project.Settings import Settings
+from Project.resources import load_sound
 
 pygame.init()
 
 class GUI:
 	def __init__(self, game, db):
-		from Project.Turret import Turret
-		self.game = game
-		self.db = db
-		self.settings = Settings()
-		self.zombie = Zombie(1, self)
-		self.turret = Turret(self.game)
+        from Project.Turret import Turret
+        self.game = game
+        self.db = db
+        # Share Settings from game to avoid redundant re-instantiation
+        self.settings = getattr(game, 'settings', None) or Settings()
+        self.zombie = Zombie(1, self.game)
+        self.turret = Turret(self.game)
 		#self.powerup = Powerup(self.game, self)
 
 		self.color_active = pygame.Color('lightskyblue3') 
@@ -38,8 +40,7 @@ class GUI:
 		self.done_typing, self.can_type = False, True
 		self.lives = Group()
 
-		self.sound_GO = pygame.mixer.Sound("Sounds/Game over.wav")
-		self.sound_GO.set_volume(0.5) 
+        self.sound_GO = load_sound("Game over.wav", 0.5)
 
 	def game_over_screen(self, game):
 		self.sound_GO.play(0)
@@ -122,7 +123,7 @@ class GUI:
 
 	def show_bars(self):
 		self.x_offset, self.y_offset = 5, 100
-		self.aps = pygame.Surface((130,200), pygame.SRCALPHA)
+        self.aps = pygame.Surface((130,200), pygame.SRCALPHA).convert_alpha()
 		self.aps.set_colorkey((0, 0, 0, 0))#all powerup surfaces
 
 		for i, powerup in enumerate(self.game.bars):

@@ -7,7 +7,8 @@ class Bullet(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 
 		self.turret = turret
-		self.settings = Settings()
+        # Share settings from turret/game hierarchy
+        self.settings = getattr(turret, 'settings', None) or Settings()
 
 		self.x, self.y = self.turret.rect.x, self.turret.rect.y
 		self.r = self.settings.r
@@ -15,7 +16,7 @@ class Bullet(pygame.sprite.Sprite):
 		
 		self.speed = 5
 
-		self.image = pygame.Surface((30, 50), pygame.SRCALPHA)
+        self.image = pygame.Surface((30, 50), pygame.SRCALPHA).convert_alpha()
 		pygame.draw.rect(self.image, (255, 215, 0, 255), (10, -8, 10, 20))
 
 		self.rect = self.image.get_rect(center=(startX, startY))
