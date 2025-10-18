@@ -60,7 +60,8 @@ class Zombie(pygame.sprite.Sprite):
 
         # Prepare surface once and reuse; convert_alpha for faster blits
         is_boss = self.settings.zombie_isboss.get(f"zombie{self.zombie_type}", False)
-        base_size = (30, 30) if is_boss else (50, 50)
+        base_size = (30, 30) if is_boss else (30, 30)
+        # Ensure consistent size and center point for drawing
         zombie_img = pygame.Surface(base_size, pygame.SRCALPHA).convert_alpha()
         self.image = zombie_img
 
@@ -70,8 +71,9 @@ class Zombie(pygame.sprite.Sprite):
     self.sound = load_sound("Zombie hit.wav", 0.5)
 
         if self.zombie_info:
-            pygame.draw.circle(zombie_img, self.zombie_info['color1'], (15, 15), self.zombie_info['size1'])
-            pygame.draw.circle(zombie_img, self.zombie_info['color2'], (15, 15), self.zombie_info['size2'])
+            center = (zombie_img.get_width() // 2, zombie_img.get_height() // 2)
+            pygame.draw.circle(zombie_img, self.zombie_info['color1'], center, self.zombie_info['size1'])
+            pygame.draw.circle(zombie_img, self.zombie_info['color2'], center, self.zombie_info['size2'])
             self.ACC = self.zombie_info['ACC']
 
 		self.rect = self.image.get_rect(center=(self.x, self.y))
@@ -93,10 +95,10 @@ class Zombie(pygame.sprite.Sprite):
 			self.x = self.max_x
 		if self.x < self.min_x:
 			self.x = self.min_x
-		if self.pos.y > self.max_y:
-			self.pos.y = self.max_y
-			self.kill()
-			self.game.lives -= 1
+        if self.pos.y > self.max_y:
+            self.pos.y = self.max_y
+            self.kill()
+            self.game.lives = max(0, self.game.lives - 1)
 		if self.y < self.min_y:
 			self.y = self.min_y
 		if self.game.lives <= 0:

@@ -16,8 +16,8 @@ class Bullet(pygame.sprite.Sprite):
 		
 		self.speed = 5
 
-        self.image = pygame.Surface((30, 50), pygame.SRCALPHA).convert_alpha()
-		pygame.draw.rect(self.image, (255, 215, 0, 255), (10, -8, 10, 20))
+        self.image = pygame.Surface((6, 12), pygame.SRCALPHA).convert_alpha()
+        pygame.draw.rect(self.image, (255, 215, 0, 255), (0, 0, 6, 12))
 
 		self.rect = self.image.get_rect(center=(startX, startY))
 		self.init_dir()

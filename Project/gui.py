@@ -182,6 +182,7 @@ class GUI:
         self.game.turret.TurretMove()
         self.game.screen.blit(self.game.turret.image, self.game.turret.rect)
         for zombie in self.game.zombieList.sprites():
+            # Ensure the instance's own image alpha is used
             zombie.image.set_alpha(zombie.alpha)
             self.game.screen.blit(zombie.image, zombie.rect)
             zombie.ZombieMove(self.game.screen)
