@@ -94,7 +94,7 @@ class GUI:
         self.show_HS(self.game)
         self.game.get_quit()
         self.clock.tick(60)
-        pygame.display.flip()
+        self.game.present()
 
     def show_HS(self, game):
         self.game.get_quit()
@@ -151,6 +151,8 @@ class GUI:
         self.game.game_over = False
         self.game.screen.fill(("white"))
         self.a, self.b = pygame.mouse.get_pos()
+        # Map to design-space for accurate button hover behavior
+        self.a, self.b = self.game.to_design_pos((self.a, self.b))
         self.game.screen.blit(self.font1.render("Press space to begin", True, ("black")), [60, 180])
         if self.button.x <= self.a <= self.button.x + 100 and self.button.y <= self.b <= self.button.y + 40:
             pygame.draw.rect(self.game.screen, ("gray27"), self.button)
@@ -159,16 +161,17 @@ class GUI:
             pygame.draw.rect(self.game.screen, ("gray39"), self.button)
             self.game.screen.blit(self.surf, (self.button.centerx - 35, self.button.centery - 15))
         self.clock.tick(60)
-        pygame.display.update()
+        self.game.present()
 
     def shop_screen(self, game):
         self.game.get_quit()
         pygame.mouse.set_visible(True)
-        self.c, self.d = pygame.mouse.get_pos()
+        cx, cy = pygame.mouse.get_pos()
+        self.c, self.d = self.game.to_design_pos((cx, cy))
         self.game.screen.fill(("sienna"))
         self.game.screen.blit(self.surf_shop, (self.shop_button.centerx - 10, self.shop_button.centery - 15))
         self.clock.tick(60)
-        pygame.display.update()
+        self.game.present()
 
     def game_screen(self, game):
         self.game.get_quit()
