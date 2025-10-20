@@ -35,14 +35,17 @@ while True:
 			if keys[pygame.K_SPACE]:
 				game.game_state = "game"
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if game.gui.button.collidepoint(event.pos):
+				# Convert physical click to design-space before testing rects
+				design_pos = game.to_design_pos(event.pos)
+				if game.gui.button.collidepoint(desi gn_pos):
 					game.game_state = "shop"
 
 	if game.game_state == "shop":
 		game.gui.shop_screen(game)
 		for event in pygame.event.get():
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if game.gui.shop_button.collidepoint(event.pos):
+				design_pos = game.to_design_pos(event.pos)
+				if game.gui.shop_button.collidepoint(desi gn_pos):
 						game.game_state = "menu"
 
 	if game.game_state == "game":

@@ -193,4 +193,5 @@ class GUI:
         self.show_lives(self.game)
         self.show_bars()
         self.clock.tick(60)
-        pygame.display.update()
+        # Present scaled to fullscreen
+        self.game.present()

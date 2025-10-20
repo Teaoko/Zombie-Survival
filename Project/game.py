@@ -1,4 +1,5 @@
 import pygame, time, sys
+from Project.resources import load_sound
 
 from Project.Zombie import Zombie
 from Project.Bullet import Bullet
@@ -16,9 +17,16 @@ class Game:
         self.bars = pygame.sprite.Group()
         self.db = db
 
-        # Screen settings
-        self.screen = pygame.display.set_mode((self.settings.width, self.settings.height))
+        # Display and render surfaces (fullscreen + design surface)
+        info = pygame.display.Info()
+        self.monitor_width, self.monitor_height = info.current_w, info.current_h
+        self.display = pygame.display.set_mode((self.monitor_width, self.monitor_height), pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Survival")
+        # Base logical resolution (use settings)
+        self.design_width, self.design_height = self.settings.width, self.settings.height
+        self.screen = pygame.Surface((self.design_width, self.design_height)).convert_alpha()
+        self.scale_x = self.monitor_width / self.design_width
+        self.scale_y = self.monitor_height / self.design_height
 
         self.turret = Turret(self)
         # Do not create a zombie here; spawns are managed by zombieSpawn
@@ -61,7 +69,12 @@ class Game:
         self.lives = self.settings.lives
         self.life_added = self.settings.life_added
 
-        # Joystick info (optional)
+        # Sounds
+        self.snd_fire = load_sound("Turret fired.wav", 0.5)
+        self.snd_reload = load_sound("Turret reload.wav", 0.5)
+        self.snd_cant = load_sound("Can't reload.wav", 0.5)
+
+        # Joystick info (optional init)
         if pygame.joystick.get_count() > 0:
             joystick = pygame.joystick.Joystick(0)
             joystick.init()
@@ -99,10 +112,14 @@ class Game:
                 if self.turret.amo > 0 and len(self.bulletList) < 3:
                     self.turret.amo -= 1
                     self.bulletList.add(Bullet(self.turret.rect.centerx, self.turret.rect.centery, self.turret))
+                    self.snd_fire.play()
             # Button 1 to reload
             elif event.button == 1:
                 if self.turret.amo < self.turret.max_amo:
                     self.turret.amo = self.turret.max_amo
+                    self.snd_reload.play()
+                else:
+                    self.snd_cant.play()
 
         # Keyboard
         keys = pygame.key.get_pressed()
@@ -110,9 +127,13 @@ class Game:
             if self.turret.amo > 0 and len(self.bulletList) < 3:
                 self.turret.amo -= 1
                 self.bulletList.add(Bullet(self.turret.rect.centerx, self.turret.rect.centery, self.turret))
+                self.snd_fire.play()
         if keys[pygame.K_r]:
             if self.turret.amo < self.turret.max_amo:
                 self.turret.amo = self.turret.max_amo
+                self.snd_reload.play()
+            else:
+                self.snd_cant.play()
 
     def handle_events(self) -> None:
         for event in pygame.event.get():
@@ -160,3 +181,13 @@ class Game:
         if keys[pygame.K_ESCAPE] or keys[pygame.K_q]:
             pygame.quit()
             sys.exit()
+
+    def to_design_pos(self, pos):
+        x, y = pos
+        return (x / self.scale_x, y / self.scale_y)
+
+    def present(self) -> None:
+        # Scale the logical surface to the fullscreen display
+        scaled = pygame.transform.smoothscale(self.screen, (self.monitor_width, self.monitor_height))
+        self.display.blit(scaled, (0, 0))
+        pygame.display.flip()
