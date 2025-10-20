@@ -67,8 +67,11 @@ class Zombie(pygame.sprite.Sprite):
 		self.alpha = 255
 		self.fade_speed = 2
 
-		self.sound = pygame.mixer.Sound("Sounds/Zombie hit.wav")
-		self.sound.set_volume(0.5) 
+		try:
+			self.sound = pygame.mixer.Sound("Sounds/Zombie hit.wav")
+			self.sound.set_volume(0.5)
+		except pygame.error:
+			self.sound = None  # No sound if audio is not available 
 
 		if self.zombie_info:
 			self.zombie = pygame.draw.circle(zombie_img, self.zombie_info['color1'], (15, 15), self.zombie_info['size1'])
@@ -125,7 +128,8 @@ class Zombie(pygame.sprite.Sprite):
 	def fade_out(self):
 		self.alpha -= self.fade_speed
 		if self.alpha <= 0:
-			self.sound.play(0)
+			if self.sound:
+				self.sound.play(0)
 			self.kill()
 			self.PUC = random.randint(1, 100)#Power-up chance
 			if self.PUC % 7 == 0:

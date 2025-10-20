@@ -44,8 +44,11 @@ class Turret(pygame.sprite.Sprite):
 		self.last_damage_time = 0
 		self.damage_duration = 2
 
-		self.sound = pygame.mixer.Sound("Sounds/Turret hit.wav")
-		self.sound.set_volume(0.5) 
+		try:
+			self.sound = pygame.mixer.Sound("Sounds/Turret hit.wav")
+			self.sound.set_volume(0.5)
+		except pygame.error:
+			self.sound = None 
 
 	def handle_rotate(self):
 		keys = pygame.key.get_pressed()
@@ -82,7 +85,10 @@ class Turret(pygame.sprite.Sprite):
 				self.game.zombieList.remove(zombie)
 				self.last_damage_time = time.time()
 				pygame.mixer.music.load("Sounds/Turret hit.wav")
-				pygame.mixer.music.play()
+				try:
+					pygame.mixer.music.play()
+				except pygame.error:
+					pass  # Ignore audio errors
 
 		if self.is_ethereal:
 			self.flicker()
