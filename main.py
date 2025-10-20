@@ -35,15 +35,16 @@ while True:
 			if keys[pygame.K_SPACE]:
 				game.game_state = "game"
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				# With SCALED flag, event.pos maps to window coords directly
-				if game.gui.button.collidepoint(event.pos):
+				design_pos = game.to_design_pos(event.pos)
+				if game.gui.button.collidepoint(design_pos):
 					game.game_state = "shop"
 
 	if game.game_state == "shop":
 		game.gui.shop_screen(game)
 		for event in pygame.event.get():
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if game.gui.shop_button.collidepoint(event.pos):
+				design_pos = game.to_design_pos(event.pos)
+				if game.gui.shop_button.collidepoint(design_pos):
 						game.game_state = "menu"
 
 	if game.game_state == "game":

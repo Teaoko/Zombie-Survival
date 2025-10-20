@@ -17,12 +17,13 @@ class Game:
         self.bars = pygame.sprite.Group()
         self.db = db
 
-        # Fullscreen with automatic scaling by SDL (simpler, reliable)
-        self.screen = pygame.display.set_mode(
-            (self.settings.width, self.settings.height),
-            pygame.FULLSCREEN | pygame.SCALED,
-        )
+        # Fullscreen at desktop resolution; draw to a logical design surface and letterbox
+        self.display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Survival")
+        self.monitor_width, self.monitor_height = self.display.get_size()
+        self.design_width, self.design_height = self.settings.width, self.settings.height
+        self.screen = pygame.Surface((self.design_width, self.design_height)).convert_alpha()
+        self._compute_scaler()
 
         self.turret = Turret(self)
         # Do not create a zombie here; spawns are managed by zombieSpawn
@@ -178,4 +179,26 @@ class Game:
             pygame.quit()
             sys.exit()
 
-    # With SCALED flag, screen is auto-scaled; flip after drawing
+    def _compute_scaler(self) -> None:
+        # Maintain aspect ratio, center with letterboxing
+        scale_w = self.monitor_width / self.design_width
+        scale_h = self.monitor_height / self.design_height
+        self.scale = min(scale_w, scale_h)
+        self.scaled_width = int(self.design_width * self.scale)
+        self.scaled_height = int(self.design_height * self.scale)
+        self.offset_x = (self.monitor_width - self.scaled_width) // 2
+        self.offset_y = (self.monitor_height - self.scaled_height) // 2
+
+    def to_design_pos(self, pos):
+        px, py = pos
+        # Transform from physical to design coordinates
+        dx = (px - self.offset_x) / self.scale
+        dy = (py - self.offset_y) / self.scale
+        return (dx, dy)
+
+    def present(self) -> None:
+        # Scale logical surface to display with letterboxing
+        scaled = pygame.transform.smoothscale(self.screen, (self.scaled_width, self.scaled_height))
+        self.display.fill((0, 0, 0))
+        self.display.blit(scaled, (self.offset_x, self.offset_y))
+        pygame.display.flip()
