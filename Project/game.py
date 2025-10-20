@@ -17,16 +17,12 @@ class Game:
         self.bars = pygame.sprite.Group()
         self.db = db
 
-        # Display and render surfaces (fullscreen + design surface)
-        info = pygame.display.Info()
-        self.monitor_width, self.monitor_height = info.current_w, info.current_h
-        self.display = pygame.display.set_mode((self.monitor_width, self.monitor_height), pygame.FULLSCREEN)
+        # Fullscreen with automatic scaling by SDL (simpler, reliable)
+        self.screen = pygame.display.set_mode(
+            (self.settings.width, self.settings.height),
+            pygame.FULLSCREEN | pygame.SCALED,
+        )
         pygame.display.set_caption("Zombie Survival")
-        # Base logical resolution (use settings)
-        self.design_width, self.design_height = self.settings.width, self.settings.height
-        self.screen = pygame.Surface((self.design_width, self.design_height)).convert_alpha()
-        self.scale_x = self.monitor_width / self.design_width
-        self.scale_y = self.monitor_height / self.design_height
 
         self.turret = Turret(self)
         # Do not create a zombie here; spawns are managed by zombieSpawn
@@ -182,12 +178,4 @@ class Game:
             pygame.quit()
             sys.exit()
 
-    def to_design_pos(self, pos):
-        x, y = pos
-        return (x / self.scale_x, y / self.scale_y)
-
-    def present(self) -> None:
-        # Scale the logical surface to the fullscreen display
-        scaled = pygame.transform.smoothscale(self.screen, (self.monitor_width, self.monitor_height))
-        self.display.blit(scaled, (0, 0))
-        pygame.display.flip()
+    # With SCALED flag, screen is auto-scaled; flip after drawing
