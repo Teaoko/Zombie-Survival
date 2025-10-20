@@ -12,19 +12,19 @@ class DB:
 			)
 		''')
 
-	def insert_score(self, PN, Score):
-		self.cur.execute('INSERT INTO "Scores" (Name, Score) VALUES ("{}", "{}")'.format(PN, Score))
+    def insert_score(self, player_name: str, score: int) -> None:
+        self.cur.execute('INSERT INTO "Scores" (Name, Score) VALUES (?, ?)', (player_name, score))
 		self.conn.commit()
 
-	def get_top_scores(self, limit):
-		return self.cur.execute('SELECT Name, Score FROM Scores ORDER BY Score DESC LIMIT {limit}'.format(limit = limit)).fetchall()
+    def get_top_scores(self, limit: int):
+        return self.cur.execute('SELECT Name, Score FROM Scores ORDER BY Score DESC LIMIT ?', (limit,)).fetchall()
 
-	def is_high_score(self, Score):
-		lowest_score = self.cur.execute('SELECT Score FROM Scores ORDER BY Score ASC LIMIT 5').fetchone()
-		if lowest_score is None or Score > lowest_score[0]:
+    def is_high_score(self, score: int) -> bool:
+        lowest_score = self.cur.execute('SELECT Score FROM Scores ORDER BY Score ASC LIMIT 5').fetchone()
+        if lowest_score is None or score > lowest_score[0]:
 			self.conn.commit()
 			return True
-		elif Score == lowest_score[0]:
+        elif score == lowest_score[0]:
 			return False
 		return False
 

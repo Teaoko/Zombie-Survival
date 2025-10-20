@@ -1,9 +1,9 @@
 import pygame, random, pygame.sprite
-from pygame.math import Vector2
 from Project.Settings import Settings
 from Project.Powerup import Powerup
+from Project.resources import load_sound
 
-pygame.init()
+# pygame.init() is handled in main
 
 class Zombie(pygame.sprite.Sprite):
 	def __init__(self, zombie_type, game):
@@ -12,7 +12,8 @@ class Zombie(pygame.sprite.Sprite):
 
 		self.game = game
 		self.powerup = None
-		self.settings = Settings()
+    # Share settings from the parent game to avoid repeated instantiation
+    self.settings = getattr(game, 'settings', None) or Settings()
 		self.r = self.settings.r
 		self.max_x, self.max_y, self.min_x, self.min_y = self.settings.max_x, self.settings.max_y, self.settings.min_x, self.settings.min_y
 		self.alpha = self.settings.alpha
@@ -57,23 +58,23 @@ class Zombie(pygame.sprite.Sprite):
 		self.min_y = 0 + self.r
 		self.dy = self.zombie_type
 
-		for value in self.settings.zombie_isboss.items():
-			if value:
-				zombie_img = pygame.Surface((30, 30), pygame.SRCALPHA)
-			else:
-				zombie_img = pygame.Surface((50, 50), pygame.SRCALPHA)
-			self.image = zombie_img
+        # Prepare surface once and reuse; convert_alpha for faster blits
+        is_boss = self.settings.zombie_isboss.get(f"zombie{self.zombie_type}", False)
+        base_size = (30, 30) if is_boss else (30, 30)
+        # Ensure consistent size and center point for drawing
+        zombie_img = pygame.Surface(base_size, pygame.SRCALPHA).convert_alpha()
+        self.image = zombie_img
 
 		self.alpha = 255
 		self.fade_speed = 2
 
-		self.sound = pygame.mixer.Sound("Sounds/Zombie hit.wav")
-		self.sound.set_volume(0.5) 
+    self.sound = load_sound("Zombie hit.wav", 0.5)
 
-		if self.zombie_info:
-			self.zombie = pygame.draw.circle(zombie_img, self.zombie_info['color1'], (15, 15), self.zombie_info['size1'])
-			self.zombie = pygame.draw.circle(zombie_img, self.zombie_info['color2'], (15, 15), self.zombie_info['size2'])
-			self.ACC = self.zombie_info['ACC']
+        if self.zombie_info:
+            center = (zombie_img.get_width() // 2, zombie_img.get_height() // 2)
+            pygame.draw.circle(zombie_img, self.zombie_info['color1'], center, self.zombie_info['size1'])
+            pygame.draw.circle(zombie_img, self.zombie_info['color2'], center, self.zombie_info['size2'])
+            self.ACC = self.zombie_info['ACC']
 
 		self.rect = self.image.get_rect(center=(self.x, self.y))
 
@@ -94,10 +95,10 @@ class Zombie(pygame.sprite.Sprite):
 			self.x = self.max_x
 		if self.x < self.min_x:
 			self.x = self.min_x
-		if self.pos.y > self.max_y:
-			self.pos.y = self.max_y
-			self.kill()
-			self.game.lives -= 1
+        if self.pos.y > self.max_y:
+            self.pos.y = self.max_y
+            self.kill()
+            self.game.lives = max(0, self.game.lives - 1)
 		if self.y < self.min_y:
 			self.y = self.min_y
 		if self.game.lives <= 0:
@@ -120,7 +121,7 @@ class Zombie(pygame.sprite.Sprite):
 			self.is_dead = True
 			self.fade_out()
 		else:
-			self.image.set_alpha(self.alpha)
+            self.image.set_alpha(self.alpha)
 
 	def fade_out(self):
 		self.alpha -= self.fade_speed
