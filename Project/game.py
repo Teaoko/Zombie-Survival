@@ -22,20 +22,30 @@ class Game:
 		self.db = db 
 
 		#Screen settings
-		#Testing
-		"""info = pygame.display.Info()
+		# Get monitor dimensions
+		info = pygame.display.Info()
 		self.monitor_width, self.monitor_height = info.current_w, info.current_h
+		
+		# Set up fullscreen mode
 		self.screen = pygame.display.set_mode((self.monitor_width, self.monitor_height), pygame.FULLSCREEN)
 		pygame.display.set_caption("Zombie Survival")
 
-		self.DESIGN_WIDTH, self.DESIGN_HEIGHT = 800, 600
+		# Design resolution (the game's internal resolution)
+		self.DESIGN_WIDTH, self.DESIGN_HEIGHT = 400, 400
 		self.game_surface = pygame.Surface((self.DESIGN_WIDTH, self.DESIGN_HEIGHT))
 
-		self.scaled_surface = pygame.transform.scale(self.game_surface, (self.monitor_width, self.monitor_height))
-		#self.screen.blit(self.scaled_surface, (0, 0))"""
-
-		self.screen = pygame.display.set_mode((self.settings.width, self.settings.height))
-		pygame.display.set_caption("Zombie Survival")
+		# Calculate scaling to fill screen while maintaining aspect ratio
+		scale_x = self.monitor_width / self.DESIGN_WIDTH
+		scale_y = self.monitor_height / self.DESIGN_HEIGHT
+		self.scale = min(scale_x, scale_y)  # Use smaller scale to maintain aspect ratio
+		
+		# Calculate scaled dimensions
+		self.scaled_width = int(self.DESIGN_WIDTH * self.scale)
+		self.scaled_height = int(self.DESIGN_HEIGHT * self.scale)
+		
+		# Calculate offset to center the game
+		self.offset_x = (self.monitor_width - self.scaled_width) // 2
+		self.offset_y = (self.monitor_height - self.scaled_height) // 2
 
 		self.turret = Turret(self)
 		self.zombie = Zombie(1, self)

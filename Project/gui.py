@@ -38,24 +38,30 @@ class GUI:
 		self.done_typing, self.can_type = False, True
 		self.lives = Group()
 
-		self.sound_GO = pygame.mixer.Sound("Sounds/Game over.wav")
-		self.sound_GO.set_volume(0.5) 
+		try:
+			self.sound_GO = pygame.mixer.Sound("Sounds/Game over.wav")
+			self.sound_GO.set_volume(0.5)
+		except pygame.error:
+			self.sound_GO = None 
 
 	def game_over_screen(self, game):
-		self.sound_GO.play(0)
+		if self.sound_GO:
+			self.sound_GO.play(0)
 		pygame.mouse.set_visible(True)
 		self.done_typing = False
-		self.game.screen.fill((0, 0, 0))
+		
+		# Fill the game surface
+		self.game.game_surface.fill((0, 0, 0))
 		self.game.turret.amo = 20
-		self.game.screen.blit(self.font1.render("Game Over", True, ("white")), [130, 30])
-		self.game.screen.blit(self.font4.render("Press r to go back to the menu", True, ("white")), [60, 100])
-		self.game.screen.blit(self.font4.render("Press esc to exit or stop the project", True, ("white")), [40, 140])
+		self.game.game_surface.blit(self.font1.render("Game Over", True, ("white")), [130, 30])
+		self.game.game_surface.blit(self.font4.render("Press r to go back to the menu", True, ("white")), [60, 100])
+		self.game.game_surface.blit(self.font4.render("Press esc to exit or stop the project", True, ("white")), [40, 140])
 
 		if self.game.db.is_high_score(self.game.hits) and self.PNs_entered < self.PNs_allowed:
 			self.can_type, self.HSO = True, False
-			self.game.screen.blit(self.text_surface, (10, 350))
+			self.game.game_surface.blit(self.text_surface, (10, 350))
 			self.text_surface = self.font5.render("Please Enter a name: ", True, (255, 255, 255))
-			self.game.screen.blit(self.font5.render(self.PN, True, (255, 255, 255)), (10 + self.text_surface.get_width() + 5, 350))
+			self.game.game_surface.blit(self.font5.render(self.PN, True, (255, 255, 255)), (10 + self.text_surface.get_width() + 5, 350))
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN and self.can_type:
 					if event.key == pygame.K_RETURN:
@@ -74,7 +80,7 @@ class GUI:
 
 		else:
 			self.text_surface = self.font5.render("", True, (255, 255, 255))
-			self.game.screen.blit(self.text_surface, (10, 300))
+			self.game.game_surface.blit(self.text_surface, (10, 300))
 			self.PN = ""
 			self.HSO, self.can_type = False, False
 
@@ -90,6 +96,12 @@ class GUI:
 				sys.exit()
 
 		self.show_HS(self.game)
+		
+		# Scale and display
+		scaled_surface = pygame.transform.scale(self.game.game_surface, (self.game.scaled_width, self.game.scaled_height))
+		self.game.screen.fill((0, 0, 0))
+		self.game.screen.blit(scaled_surface, (self.game.offset_x, self.game.offset_y))
+		
 		self.game.get_quit()
 		self.clock.tick(60)
 		pygame.display.flip()
@@ -102,7 +114,7 @@ class GUI:
 			score, name = score_tuple[0], score_tuple[1]
 			score_text = f"{score} - {name}"
 			score_msg = self.font1.render(score_text, True, (255, 255, 255))
-			self.game.screen.blit(score_msg, [170, self.score_height])
+			self.game.game_surface.blit(score_msg, [170, self.score_height])
 			self.score_height += 27
 
 	def show_lives(self, game):
@@ -118,7 +130,7 @@ class GUI:
 			self.x_pos = live_number * (self.turret_surf.get_width() + 5)
 			self.ats.blit(self.turret_surf, (self.x_pos, 0))
 		
-		self.game.screen.blit(self.ats, (self.x_offset, self.y_offset))
+		self.game.game_surface.blit(self.ats, (self.x_offset, self.y_offset))
 
 	def show_bars(self):
 		self.x_offset, self.y_offset = 5, 100
@@ -129,7 +141,7 @@ class GUI:
 			powerup.PUCountDown()
 			self.aps.blit(powerup.powerup_img, (10, 10 + (powerup.offset * i)))
 			
-		self.game.screen.blit(self.aps, (self.x_offset, self.y_offset))
+		self.game.game_surface.blit(self.aps, (self.x_offset, self.y_offset))
 	
 	def menu_screen(self, game):
 		self.game.get_quit()
@@ -144,47 +156,87 @@ class GUI:
 		self.game.zombieList.empty()
 		self.game.bulletList.empty()
 		self.game.game_over = False
-		self.game.screen.fill(("white"))
-		self.a, self.b = pygame.mouse.get_pos()
-		self.game.screen.blit(self.font1.render("Press space to begin", True, ("black")), [60, 180])
-		if self.button.x <= self.a <= self.button.x + 100 and self.button.y <= self.b <= self.button.y + 40:
-			pygame.draw.rect(self.game.screen, ("gray27"), self.button)
-			self.game.screen.blit(self.surf, (self.button.centerx - 35, self.button.centery - 15))
+		
+		# Fill the game surface
+		self.game.game_surface.fill(("white"))
+		
+		# Get mouse position relative to the scaled game area
+		mouse_x, mouse_y = pygame.mouse.get_pos()
+		# Convert screen coordinates to game surface coordinates
+		game_mouse_x = (mouse_x - self.game.offset_x) / self.game.scale
+		game_mouse_y = (mouse_y - self.game.offset_y) / self.game.scale
+		
+		self.game.game_surface.blit(self.font1.render("Press space to begin", True, ("black")), [60, 180])
+		
+		if self.button.x <= game_mouse_x <= self.button.x + 100 and self.button.y <= game_mouse_y <= self.button.y + 40:
+			pygame.draw.rect(self.game.game_surface, ("gray27"), self.button)
+			self.game.game_surface.blit(self.surf, (self.button.centerx - 35, self.button.centery - 15))
 		else:
-			pygame.draw.rect(self.game.screen, ("gray39"), self.button)
-			self.game.screen.blit(self.surf, (self.button.centerx - 35, self.button.centery - 15))
+			pygame.draw.rect(self.game.game_surface, ("gray39"), self.button)
+			self.game.game_surface.blit(self.surf, (self.button.centerx - 35, self.button.centery - 15))
+		
+		# Scale and display
+		scaled_surface = pygame.transform.scale(self.game.game_surface, (self.game.scaled_width, self.game.scaled_height))
+		self.game.screen.fill((0, 0, 0))
+		self.game.screen.blit(scaled_surface, (self.game.offset_x, self.game.offset_y))
+		
 		self.clock.tick(60)
 		pygame.display.update()
 
 	def shop_screen(self, game):
 		self.game.get_quit()
 		pygame.mouse.set_visible(True)
-		self.c, self.d = pygame.mouse.get_pos()
-		self.game.screen.fill(("sienna"))
-		self.game.screen.blit(self.surf_shop, (self.shop_button.centerx - 10, self.shop_button.centery-15))
+		
+		# Fill the game surface
+		self.game.game_surface.fill(("sienna"))
+		self.game.game_surface.blit(self.surf_shop, (self.shop_button.centerx - 10, self.shop_button.centery-15))
+		
+		# Scale and display
+		scaled_surface = pygame.transform.scale(self.game.game_surface, (self.game.scaled_width, self.game.scaled_height))
+		self.game.screen.fill((0, 0, 0))
+		self.game.screen.blit(scaled_surface, (self.game.offset_x, self.game.offset_y))
+		
 		self.clock.tick(60)
 		pygame.display.update()
 
 	def game_screen(self, game):
 		self.game.get_quit()
 		pygame.mouse.set_visible(False)
-		self.game.screen.fill(("gray43"))
+		
+		# Fill the game surface (internal resolution)
+		self.game.game_surface.fill(("gray43"))
+		
 		self.game.handle_events()
-		self.game.screen.blit(self.font1.render("amo: " + str(self.game.turret.amo), True, ("black")), [270, 360])
-		self.game.screen.blit(self.font2.render("money: " + str(self.game.dollars), True, ("black")), [0, 0])
-		self.game.screen.blit(self.font3.render("wave: " + str(self.game.wave), True, ("black")), [0, 50])
+		
+		# Render all game elements to the game surface instead of directly to screen
+		self.game.game_surface.blit(self.font1.render("amo: " + str(self.game.turret.amo), True, ("black")), [270, 360])
+		self.game.game_surface.blit(self.font2.render("money: " + str(self.game.dollars), True, ("black")), [0, 0])
+		self.game.game_surface.blit(self.font3.render("wave: " + str(self.game.wave), True, ("black")), [0, 50])
 		self.game.CountDown()
 		self.game.turret.TurretMove()
-		self.game.screen.blit(self.game.turret.image, self.game.turret.rect) 
+		self.game.game_surface.blit(self.game.turret.image, self.game.turret.rect) 
+		
 		for zombie in self.game.zombieList.sprites():
 			self.zombie.image.set_alpha(zombie.alpha)
-			self.game.screen.blit(zombie.image, zombie.rect)
-			zombie.ZombieMove(self.game.screen)
+			self.game.game_surface.blit(zombie.image, zombie.rect)
+			zombie.ZombieMove(self.game.game_surface)
+			
 		for bullet in self.game.bulletList:
-			self.game.screen.blit(bullet.image, bullet.rect)
+			self.game.game_surface.blit(bullet.image, bullet.rect)
 			self.game.BulletMove(bullet)
+			
 		self.game.update_zombies()
 		self.show_lives(self.game)
 		self.show_bars()
+		
+		# Scale the game surface to fill the screen
+		scaled_surface = pygame.transform.scale(self.game.game_surface, (self.game.scaled_width, self.game.scaled_height))
+		
+		# Fill screen with black background
+		self.game.screen.fill((0, 0, 0))
+		
+		# Blit the scaled game surface centered on the screen
+		self.game.screen.blit(scaled_surface, (self.game.offset_x, self.game.offset_y))
+		
 		self.clock.tick(60)
 		pygame.display.update()

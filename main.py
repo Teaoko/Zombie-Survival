@@ -11,7 +11,11 @@ from random import randint
 #color codes snow3(205, 201 201, 255)  gold(255, 215, 0, 255) peru(205, 133, 63, 255), purple 4(85, 26, 139, 255), saddlebrown(139, 69, 19, 255), salmon4(139, 76, 57, 255)
 #Book
 
-pygame.init()	
+pygame.init()
+try:
+    pygame.mixer.init()  # Initialize the mixer for sound
+except pygame.error:
+    print("Warning: Could not initialize audio mixer. Game will run without sound.")
 db = DB()
 game = Game(db)
 settings = Settings() 
@@ -19,12 +23,15 @@ settings = Settings()
 """turret = Turret(game)
 gui = GUI(game, db)"""
 
-sound_TF = pygame.mixer.Sound("Sounds/Turret fired.wav")
-sound_TF.set_volume(0.5) 
-sound_TR = pygame.mixer.Sound("Sounds/Turret reload.wav")
-sound_TR.set_volume(0.5) 
-sound_CR = pygame.mixer.Sound("Sounds/Can't reload.wav")
-sound_CR.set_volume(0.5)
+try:
+    sound_TF = pygame.mixer.Sound("Sounds/Turret fired.wav")
+    sound_TF.set_volume(0.5) 
+    sound_TR = pygame.mixer.Sound("Sounds/Turret reload.wav")
+    sound_TR.set_volume(0.5) 
+    sound_CR = pygame.mixer.Sound("Sounds/Can't reload.wav")
+    sound_CR.set_volume(0.5)
+except pygame.error:
+    sound_TF = sound_TR = sound_CR = None
 
 while True:
 	if game.game_state == "menu":
@@ -34,14 +41,20 @@ while True:
 			if keys[pygame.K_SPACE]:
 				game.game_state = "game"
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if game.gui.button.collidepoint(event.pos):
+				# Convert screen coordinates to game surface coordinates
+				game_mouse_x = (event.pos[0] - game.offset_x) / game.scale
+				game_mouse_y = (event.pos[1] - game.offset_y) / game.scale
+				if game.gui.button.collidepoint((game_mouse_x, game_mouse_y)):
 					game.game_state = "shop"
 
 	if game.game_state == "shop":
 		game.gui.shop_screen(game)
 		for event in pygame.event.get():
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if game.gui.shop_button.collidepoint(event.pos):
+				# Convert screen coordinates to game surface coordinates
+				game_mouse_x = (event.pos[0] - game.offset_x) / game.scale
+				game_mouse_y = (event.pos[1] - game.offset_y) / game.scale
+				if game.gui.shop_button.collidepoint((game_mouse_x, game_mouse_y)):
 						game.game_state = "menu"
 
 	if game.game_state == "game":
